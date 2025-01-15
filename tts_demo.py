@@ -71,6 +71,9 @@ def synthesize_speech(text, voice):
 # Get list of available voices
 available_voices = list_available_voices()
 
+# Demo example text
+demo_text = """In the gentle glow of the moon, a curious scene unfolded. Little creatures with wings of buttery petals fluttered silently, orchestrating a dance of shadows and light. In the heart of the garden, the flowers seemed to sway gently, participating in the quiet celebration. The little listener could almost hear a soft hum, a melody of the night, as if the stars themselves were singing, sprinkling dreams and wonder into the peaceful slumber of the world."""
+
 # Gradio interface
 def main():
     with gr.Blocks() as demo:
@@ -83,12 +86,36 @@ def main():
         output_audio = gr.Audio(label="Generated Speech", type="filepath")
         output_text = gr.Textbox(label="Phonemes", interactive=False)
 
+        # Function to update the input text with the demo text
+        def set_demo_text():
+            return demo_text
+
+        # Create a button styled like a clickable box for demo example
+        demo_box = gr.Button("Demo Text", variant="secondary")
+
+        # When the demo box is clicked, update the input box with the demo text
+        demo_box.click(set_demo_text, outputs=text_input)
+
         def process_input(text, voice):
             audio, phonemes = synthesize_speech(text, voice)
             return audio, phonemes
 
-        synthesize_button = gr.Button("Synthesize")
-        synthesize_button.click(process_input, inputs=[text_input, voice_dropdown], outputs=[output_audio, output_text])
+        # Change the label of the button to "Generate"
+        generate_button = gr.Button("Generate")
+        generate_button.click(process_input, inputs=[text_input, voice_dropdown], outputs=[output_audio, output_text])
+
+        # Apply custom CSS to style the demo box button
+        demo.css = """
+        #demo_button {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-block;
+            width: auto;
+        }
+        """
 
     demo.launch()
 
