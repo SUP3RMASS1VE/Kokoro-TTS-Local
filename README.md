@@ -1,3 +1,7 @@
+A Pinokio script of PierrunoYT's KokoroTTS 1-click installer
+
+
+
 # Kokoro TTS Local
 
 A local implementation of the Kokoro Text-to-Speech model, featuring dynamic module loading and automatic dependency management.
