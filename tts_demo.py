@@ -5,6 +5,27 @@ from io import BytesIO
 import os
 from models import build_model, load_voice, generate_speech, list_available_voices
 
+# Function to split text into chunks
+def split_text(text, max_tokens=500):
+    words = text.split()
+    chunks = []
+    current_chunk = []
+    current_length = 0
+
+    for word in words:
+        word_length = len(word) + 1  # Account for spaces
+        if current_length + word_length > max_tokens:
+            chunks.append(" ".join(current_chunk))
+            current_chunk = []
+            current_length = 0
+        current_chunk.append(word)
+        current_length += word_length
+
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+    
+    return chunks
+
 # Function for TTS
 def synthesize_speech(text, voice):
     try:
@@ -15,16 +36,26 @@ def synthesize_speech(text, voice):
         model = build_model('kokoro-v0_19.pth', device)
         voice_data = load_voice(voice, device)
         
-        # Generate speech
-        audio, phonemes = generate_speech(model, text, voice_data, lang='a', device=device)
+        # Split text into manageable chunks
+        text_chunks = split_text(text, max_tokens=500)
         
-        if audio is not None:
+        combined_audio = []
+        combined_phonemes = []
+        
+        # Process each chunk
+        for chunk in text_chunks:
+            audio, phonemes = generate_speech(model, chunk, voice_data, lang='a', device=device)
+            if audio is not None:
+                combined_audio.extend(audio)
+                combined_phonemes.append(phonemes)
+        
+        if combined_audio:
             # Save audio to a .wav file in the 'outputs' folder
             output_dir = "outputs"
             os.makedirs(output_dir, exist_ok=True)
             output_file = os.path.join(output_dir, "output.wav")
-            sf.write(output_file, audio, samplerate=22050, format='WAV')
-            return output_file, f"Generated phonemes: {phonemes}"
+            sf.write(output_file, combined_audio, samplerate=22050, format='WAV')
+            return output_file, f"Generated phonemes: {' '.join(combined_phonemes)}"
         else:
             return None, "Failed to generate audio."
 
