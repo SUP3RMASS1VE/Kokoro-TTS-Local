@@ -1,0 +1,8 @@
+torch
+phonemizer-fork
+transformers
+scipy
+munch
+soundfile
+huggingface-hub
+espeakng-loader 
