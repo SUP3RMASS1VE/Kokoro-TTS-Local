@@ -4,6 +4,7 @@ import soundfile as sf
 from io import BytesIO
 import os
 from models import build_model, load_voice, generate_speech, list_available_voices
+from datetime import datetime
 
 # Function to split text into chunks
 def split_text(text, max_tokens=500):
@@ -50,10 +51,15 @@ def synthesize_speech(text, voice):
                 combined_phonemes.append(phonemes)
         
         if combined_audio:
-            # Save audio to a .wav file in the 'outputs' folder
+            # Generate a unique output filename using a timestamp
             output_dir = "outputs"
             os.makedirs(output_dir, exist_ok=True)
-            output_file = os.path.join(output_dir, "output.wav")
+            
+            # Use the current timestamp for uniqueness
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_file = os.path.join(output_dir, f"output_{timestamp}.wav")
+            
+            # Save audio to a .wav file in the 'outputs' folder
             sf.write(output_file, combined_audio, samplerate=22050, format='WAV')
             return output_file, f"Generated phonemes: {' '.join(combined_phonemes)}"
         else:
