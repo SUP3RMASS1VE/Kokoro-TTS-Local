@@ -6,6 +6,12 @@ import os
 from models import build_model, load_voice, generate_speech, list_available_voices
 from datetime import datetime
 
+# Load the model and voices once, globally
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+global_model = build_model('kokoro-v0_19.pth', device)
+available_voices = list_available_voices()
+global_voice_data = {voice: load_voice(voice, device) for voice in available_voices}
+
 def split_text(text, max_tokens=500):
     words = text.split()
     chunks = []
@@ -28,10 +34,9 @@ def split_text(text, max_tokens=500):
 
 def synthesize_speech(text, voice):
     try:
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-        model = build_model('kokoro-v0_19.pth', device)
-        voice_data = load_voice(voice, device)
+        # Reuse the preloaded global model and voice
+        model = global_model
+        voice_data = global_voice_data[voice]
 
         text_chunks = split_text(text, max_tokens=500)
         
@@ -59,8 +64,6 @@ def synthesize_speech(text, voice):
     except Exception as e:
         return None, f"Error: {e}"
 
-available_voices = list_available_voices()
-
 demo_text = """In the gentle glow of the moon, a curious scene unfolded. Little creatures with wings of buttery petals fluttered silently, orchestrating a dance of shadows and light. In the heart of the garden, the flowers seemed to sway gently, participating in the quiet celebration. The little listener could almost hear a soft hum, a melody of the night, as if the stars themselves were singing, sprinkling dreams and wonder into the peaceful slumber of the world."""
 
 def main():
@@ -68,7 +71,7 @@ def main():
         gr.Markdown("# Kokoro TTS Local")
 
         with gr.Row():
-            text_input = gr.Textbox(label="Input Text", placeholder="Enter text to synthesize", lines=2)
+            text_input = gr.Textbox(label="Input Text", placeholder="Enter text to synthesise", lines=2)
             voice_dropdown = gr.Dropdown(label="Select Voice", choices=available_voices, value=available_voices[0])
 
         output_audio = gr.Audio(label="Generated Speech", type="filepath")
@@ -78,7 +81,6 @@ def main():
             return demo_text
 
         demo_box = gr.Button("Demo Text", variant="secondary")
-
         demo_box.click(set_demo_text, outputs=text_input)
 
         def process_input(text, voice):
