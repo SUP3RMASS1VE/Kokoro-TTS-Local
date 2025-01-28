@@ -36,13 +36,13 @@ def build_model(model_file, device='cpu'):
         setup_espeak()
         
         # Download necessary files from Hugging Face
-        repo_id = "hexgrad/Kokoro-82M"
-        model_path = hf_hub_download(repo_id=repo_id, filename="kokoro-v0_19.pth")
-        kokoro_py = hf_hub_download(repo_id=repo_id, filename="kokoro.py")
-        models_py = hf_hub_download(repo_id=repo_id, filename="models.py")
-        istftnet_py = hf_hub_download(repo_id=repo_id, filename="istftnet.py")
-        plbert_py = hf_hub_download(repo_id=repo_id, filename="plbert.py")
-        config_path = hf_hub_download(repo_id=repo_id, filename="config.json")
+        repo_id = "hexgrad/kLegacy"
+        model_path = hf_hub_download(repo_id=repo_id, filename="v0.19/kokoro-v0_19.pth")
+        kokoro_py = hf_hub_download(repo_id=repo_id, filename="v0.19/kokoro.py")
+        models_py = hf_hub_download(repo_id=repo_id, filename="v0.19/models.py")
+        istftnet_py = hf_hub_download(repo_id=repo_id, filename="v0.19/istftnet.py")
+        plbert_py = hf_hub_download(repo_id=repo_id, filename="v0.19/plbert.py")
+        config_path = hf_hub_download(repo_id=repo_id, filename="v0.19/config.json")
         
         # Import modules in correct dependency order
         print("Importing plbert module...")
@@ -74,8 +74,8 @@ def build_model(model_file, device='cpu'):
 def load_voice(voice_name='af', device='cpu'):
     """Load a voice from the official voicepacks."""
     try:
-        repo_id = "hexgrad/Kokoro-82M"
-        voice_path = hf_hub_download(repo_id=repo_id, filename=f"voices/{voice_name}.pt")
+        repo_id = "hexgrad/kLegacy"
+        voice_path = hf_hub_download(repo_id=repo_id, filename=f"v0.19/voices/{voice_name}.pt")
         voice = torch.load(voice_path, weights_only=True).to(device)
         print(f"Loaded voice: {voice_name}")
         return voice
@@ -98,11 +98,11 @@ def generate_speech(model, text, voice=None, lang='a', device='cpu'):
 def list_available_voices():
     """List all available voices from the official voicepacks."""
     try:
-        repo_id = "hexgrad/Kokoro-82M"
+        repo_id = "hexgrad/kLegacy"
         files = list_repo_files(repo_id)
-        # Filter for voice files in the voices directory and remove .pt extension
-        voices = [f.replace('voices/', '').replace('.pt', '') 
-                 for f in files if f.startswith('voices/') and f.endswith('.pt')]
+        # Filter for voice files in the v0.19/voices directory and remove .pt extension
+        voices = [f.replace('v0.19/voices/', '').replace('.pt', '') 
+                 for f in files if f.startswith('v0.19/voices/') and f.endswith('.pt')]
         return sorted(voices)
     except Exception as e:
         print(f"Error listing voices: {e}")
